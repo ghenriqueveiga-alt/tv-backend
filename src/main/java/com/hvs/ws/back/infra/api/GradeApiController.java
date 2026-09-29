@@ -17,13 +17,13 @@ public class GradeApiController {
     private final PatchGradeUseCase patchGradeUseCase;
     private final DeleteGradeUseCase deleteGradeUseCase;
 
-    public GradeApiController(
-            final CreateGradeUseCase createGradeUseCase,
-            final ReadGradeUseCase readGradeUseCase,
-            final ReadAllGradeUseCase readAllGradeUseCase,
-            final UpdateGradeUseCase updateGradeUseCase,
-            final PatchGradeUseCase patchGradeUseCase,
-            final DeleteGradeUseCase deleteGradeUseCase) {
+    public GradeApiController(final CreateGradeUseCase createGradeUseCase,
+                              final ReadGradeUseCase readGradeUseCase,
+                              final ReadAllGradeUseCase readAllGradeUseCase,
+                              final UpdateGradeUseCase updateGradeUseCase,
+                              final PatchGradeUseCase patchGradeUseCase,
+                              final DeleteGradeUseCase deleteGradeUseCase) {
+
         this.createGradeUseCase = createGradeUseCase;
         this.readGradeUseCase = readGradeUseCase;
         this.readAllGradeUseCase = readAllGradeUseCase;
@@ -33,8 +33,7 @@ public class GradeApiController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createGrade(
-            @RequestBody CreateGradeCommand aInput) {
+    public ResponseEntity<?> createGrade(@RequestBody CreateGradeCommand aInput) {
 
         return this.createGradeUseCase.execute(aInput)
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -42,8 +41,7 @@ public class GradeApiController {
     }
 
     @GetMapping(value = "/id/{id}")
-    public ResponseEntity<?> readGradeById(
-            @PathVariable("id") Long aId) {
+    public ResponseEntity<?> readGradeById(@PathVariable("id") Long aId) {
 
         return this.readGradeUseCase.execute(ReadGradeCommand.from(aId))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -51,8 +49,7 @@ public class GradeApiController {
     }
 
     @GetMapping(value = "/uuid/{uuid}")
-    public ResponseEntity<?> readGradeByUuid(
-            @PathVariable("uuid") String aUuid) {
+    public ResponseEntity<?> readGradeByUuid(@PathVariable("uuid") String aUuid) {
 
         return this.readGradeUseCase.execute(ReadGradeCommand.from(aUuid))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -60,12 +57,11 @@ public class GradeApiController {
     }
 
     @GetMapping
-    public ResponseEntity<?> readAllGrade(
-            @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sort,
-            @RequestParam(defaultValue = "asc") String direction) {
+    public ResponseEntity<?> readAllGrade(@RequestParam(required = false) String search,
+                                          @RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "10") int size,
+                                          @RequestParam(defaultValue = "id") String sort,
+                                          @RequestParam(defaultValue = "asc") String direction) {
 
         return this.readAllGradeUseCase.execute(new ReadAllGradeCommand(
                         new GradeSearchQuery(search, page, size, sort, direction)))
@@ -74,9 +70,8 @@ public class GradeApiController {
     }
 
     @PutMapping(value = "/id/{id}")
-    public ResponseEntity<?> updateGradeById(
-            @PathVariable("id") Long aId,
-            @RequestBody UpdateGradeCommand aInput) {
+    public ResponseEntity<?> updateGradeById(@PathVariable("id") Long aId,
+                                             @RequestBody UpdateGradeCommand aInput) {
 
         return this.updateGradeUseCase.execute(UpdateGradeCommand.from(aId, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -84,9 +79,8 @@ public class GradeApiController {
     }
 
     @PutMapping(value = "/uuid/{uuid}")
-    public ResponseEntity<?> updateGradeByUuid(
-            @PathVariable("uuid") String aUuid,
-            @RequestBody UpdateGradeCommand aInput) {
+    public ResponseEntity<?> updateGradeByUuid(@PathVariable("uuid") String aUuid,
+                                               @RequestBody UpdateGradeCommand aInput) {
 
         return this.updateGradeUseCase.execute(UpdateGradeCommand.from(aUuid, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -94,9 +88,8 @@ public class GradeApiController {
     }
 
     @PatchMapping(value = "/id/{id}")
-    public ResponseEntity<?> patchGradeById(
-            @PathVariable("id") Long aId,
-            @RequestBody PatchGradeCommand aInput) {
+    public ResponseEntity<?> patchGradeById(@PathVariable("id") Long aId,
+                                            @RequestBody PatchGradeCommand aInput) {
 
         return this.patchGradeUseCase.execute(PatchGradeCommand.from(aId, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -104,9 +97,8 @@ public class GradeApiController {
     }
 
     @PatchMapping(value = "/uuid/{uuid}")
-    public ResponseEntity<?> patchGradeByUuid(
-            @PathVariable("uuid") String aUuid,
-            @RequestBody PatchGradeCommand aInput) {
+    public ResponseEntity<?> patchGradeByUuid(@PathVariable("uuid") String aUuid,
+                                              @RequestBody PatchGradeCommand aInput) {
 
         return this.patchGradeUseCase.execute(PatchGradeCommand.from(aUuid, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -114,8 +106,7 @@ public class GradeApiController {
     }
 
     @DeleteMapping(value = "/id/{id}")
-    public ResponseEntity<?> deleteGradeById(
-            @PathVariable("id") Long aId) {
+    public ResponseEntity<?> deleteGradeById(@PathVariable("id") Long aId) {
 
         return this.deleteGradeUseCase.execute(DeleteGradeCommand.from(aId))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -123,8 +114,7 @@ public class GradeApiController {
     }
 
     @DeleteMapping(value = "/uuid/{uuid}")
-    public ResponseEntity<?> deleteCorteByUuid(
-            @PathVariable("uuid") String aUuid) {
+    public ResponseEntity<?> deleteCorteByUuid(@PathVariable("uuid") String aUuid) {
 
         return this.deleteGradeUseCase.execute(DeleteGradeCommand.from(aUuid))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),

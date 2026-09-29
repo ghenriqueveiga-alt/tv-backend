@@ -30,14 +30,14 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
     private final DeleteEpisodioUseCase deleteEpisodioUseCase;
     private final EpisodioJpaRepository episodioJpaRepository;
 
-    public EpisodioApiController(
-            final CreateEpisodioUseCase createEpisodioUseCase,
-            final ReadEpisodioUseCase readEpisodioUseCase,
-            final ReadAllEpisodioUseCase readAllEpisodioUseCase,
-            final UpdateEpisodioUseCase updateEpisodioUseCase,
-            final PatchEpisodioUseCase patchEpisodioUseCase,
-            final DeleteEpisodioUseCase deleteEpisodioUseCase,
-            final EpisodioJpaRepository episodioJpaRepository) {
+    public EpisodioApiController(final CreateEpisodioUseCase createEpisodioUseCase,
+                                 final ReadEpisodioUseCase readEpisodioUseCase,
+                                 final ReadAllEpisodioUseCase readAllEpisodioUseCase,
+                                 final UpdateEpisodioUseCase updateEpisodioUseCase,
+                                 final PatchEpisodioUseCase patchEpisodioUseCase,
+                                 final DeleteEpisodioUseCase deleteEpisodioUseCase,
+                                 final EpisodioJpaRepository episodioJpaRepository) {
+
         this.createEpisodioUseCase = createEpisodioUseCase;
         this.readEpisodioUseCase = readEpisodioUseCase;
         this.readAllEpisodioUseCase = readAllEpisodioUseCase;
@@ -48,8 +48,7 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
     }
 
     @PostMapping
-    public ResponseEntity<?> createEpisodio(
-            @RequestBody CreateEpisodioCommand aInput) {
+    public ResponseEntity<?> createEpisodio(@RequestBody CreateEpisodioCommand aInput) {
 
         return this.createEpisodioUseCase.execute(aInput)
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -57,12 +56,11 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
     }
 
     @GetMapping
-    public ResponseEntity<?> readAllEpisodio(
-            @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sort,
-            @RequestParam(defaultValue = "asc") String direction) {
+    public ResponseEntity<?> readAllEpisodio(@RequestParam(required = false) String search,
+                                             @RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = "10") int size,
+                                             @RequestParam(defaultValue = "id") String sort,
+                                             @RequestParam(defaultValue = "asc") String direction) {
 
         return this.readAllEpisodioUseCase.execute(new ReadAllEpisodioCommand(
                         EpisodioSearchQuery.from(search, null, null, page, size, sort, direction)))
@@ -75,8 +73,7 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
             responses = @ApiResponse(responseCode = "200", description = "Episódio encontrado",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ReadEpisodioOutput.class))))
-    public ResponseEntity<?> readEpisodioById(
-            @PathVariable("id") Long aId) {
+    public ResponseEntity<?> readEpisodioById(@PathVariable("id") Long aId) {
 
         return this.readEpisodioUseCase.execute(ReadEpisodioCommand.from(aId))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -88,8 +85,7 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
             responses = @ApiResponse(responseCode = "200", description = "Episódio encontrado",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ReadEpisodioOutput.class))))
-    public ResponseEntity<?> readEpisodioByUuid(
-            @PathVariable("uuid") String aUuid) {
+    public ResponseEntity<?> readEpisodioByUuid(@PathVariable("uuid") String aUuid) {
 
         return this.readEpisodioUseCase.execute(ReadEpisodioCommand.from(aUuid))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -97,8 +93,7 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
     }
 
     @GetMapping(value = "/primeiro-por-programa")
-    public ResponseEntity<?> readFirstEpisodioByProgramaIds(
-            @RequestParam String programaIds) {
+    public ResponseEntity<?> readFirstEpisodioByProgramaIds(@RequestParam String programaIds) {
 
         final java.util.List<Long> ids = java.util.Arrays.stream(programaIds.split(","))
                 .map(String::trim)
@@ -118,10 +113,9 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
     }
 
     @GetMapping(value = "/primeiros-por-programa")
-    public ResponseEntity<?> readPrimeirosEpisodiosByProgramaIds(
-            @RequestParam String programaIds,
-            @RequestParam(defaultValue = "0") int offset,
-            @RequestParam(defaultValue = "1") int limite) {
+    public ResponseEntity<?> readPrimeirosEpisodiosByProgramaIds(@RequestParam String programaIds,
+                                                                 @RequestParam(defaultValue = "0") int offset,
+                                                                 @RequestParam(defaultValue = "1") int limite) {
 
         final java.util.List<Long> ids = java.util.Arrays.stream(programaIds.split(","))
                 .map(String::trim)
@@ -189,9 +183,8 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
     }
 
     @PutMapping(value = "/id/{id}")
-    public ResponseEntity<?> updateEpisodioById(
-            @PathVariable("id") Long aId,
-            @RequestBody UpdateEpisodioCommand aInput) {
+    public ResponseEntity<?> updateEpisodioById(@PathVariable("id") Long aId,
+                                                @RequestBody UpdateEpisodioCommand aInput) {
 
         return this.updateEpisodioUseCase.execute(UpdateEpisodioCommand.from(aId, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -199,9 +192,8 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
     }
 
     @PutMapping(value = "/uuid/{uuid}")
-    public ResponseEntity<?> updateEpisodioByUuid(
-            @PathVariable("uuid") String aUuid,
-            @RequestBody UpdateEpisodioCommand aInput) {
+    public ResponseEntity<?> updateEpisodioByUuid(@PathVariable("uuid") String aUuid,
+                                                  @RequestBody UpdateEpisodioCommand aInput) {
 
         return this.updateEpisodioUseCase.execute(UpdateEpisodioCommand.from(aUuid, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -209,9 +201,8 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
     }
 
     @PatchMapping(value = "/id/{id}")
-    public ResponseEntity<?> patchEpisodioById(
-            @PathVariable("id") Long aId,
-            @RequestBody PatchEpisodioCommand aInput) {
+    public ResponseEntity<?> patchEpisodioById(@PathVariable("id") Long aId,
+                                               @RequestBody PatchEpisodioCommand aInput) {
 
         return this.patchEpisodioUseCase.execute(PatchEpisodioCommand.from(aId, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -219,9 +210,8 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
     }
 
     @PatchMapping(value = "/uuid/{uuid}")
-    public ResponseEntity<?> patchEpisodioByUuid(
-            @PathVariable("uuid") String aUuid,
-            @RequestBody PatchEpisodioCommand aInput) {
+    public ResponseEntity<?> patchEpisodioByUuid(@PathVariable("uuid") String aUuid,
+                                                 @RequestBody PatchEpisodioCommand aInput) {
 
         return this.patchEpisodioUseCase.execute(PatchEpisodioCommand.from(aUuid, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -229,8 +219,7 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
     }
 
     @DeleteMapping(value = "/id/{id}")
-    public ResponseEntity<?> deleteEpisodioById(
-            @PathVariable("id") Long aId) {
+    public ResponseEntity<?> deleteEpisodioById(@PathVariable("id") Long aId) {
 
         return this.deleteEpisodioUseCase.execute(DeleteEpisodioCommand.from(aId))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -238,8 +227,7 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
     }
 
     @DeleteMapping(value = "/uuid/{uuid}")
-    public ResponseEntity<?> deleteCorteByUuid(
-            @PathVariable("uuid") String aUuid) {
+    public ResponseEntity<?> deleteCorteByUuid(@PathVariable("uuid") String aUuid) {
 
         return this.deleteEpisodioUseCase.execute(DeleteEpisodioCommand.from(aUuid))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),

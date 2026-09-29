@@ -19,13 +19,13 @@ public class ArquivoApiController {
     private final PatchArquivoUseCase patchArquivoUseCase;
     private final DeleteArquivoUseCase deleteArquivoUseCase;
 
-    public ArquivoApiController(
-            final CreateArquivoUseCase createArquivoUseCase,
-            final ReadArquivoUseCase readArquivoUseCase,
-            final ReadAllArquivoUseCase readAllArquivoUseCase,
-            final UpdateArquivoUseCase updateArquivoUseCase,
-            final PatchArquivoUseCase patchArquivoUseCase,
-            final DeleteArquivoUseCase deleteArquivoUseCase) {
+    public ArquivoApiController(final CreateArquivoUseCase createArquivoUseCase,
+                                final ReadArquivoUseCase readArquivoUseCase,
+                                final ReadAllArquivoUseCase readAllArquivoUseCase,
+                                final UpdateArquivoUseCase updateArquivoUseCase,
+                                final PatchArquivoUseCase patchArquivoUseCase,
+                                final DeleteArquivoUseCase deleteArquivoUseCase) {
+
         this.createArquivoUseCase = createArquivoUseCase;
         this.readArquivoUseCase = readArquivoUseCase;
         this.readAllArquivoUseCase = readAllArquivoUseCase;
@@ -35,8 +35,7 @@ public class ArquivoApiController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createArquivo(
-            @RequestBody CreateArquivoCommand aInput) {
+    public ResponseEntity<?> createArquivo(@RequestBody CreateArquivoCommand aInput) {
 
         return this.createArquivoUseCase.execute(aInput)
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -44,8 +43,7 @@ public class ArquivoApiController {
     }
 
     @GetMapping(value = "/id/{id}")
-    public ResponseEntity<?> readArquivoById(
-            @PathVariable("id") Long aId) {
+    public ResponseEntity<?> readArquivoById(@PathVariable("id") Long aId) {
 
         return this.readArquivoUseCase.execute(ReadArquivoCommand.from(aId))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -53,8 +51,7 @@ public class ArquivoApiController {
     }
 
     @GetMapping(value = "/uuid/{uuid}")
-    public ResponseEntity<?> readArquivoByUuid(
-            @PathVariable("uuid") String aUuid) {
+    public ResponseEntity<?> readArquivoByUuid(@PathVariable("uuid") String aUuid) {
 
         return this.readArquivoUseCase.execute(ReadArquivoCommand.from(aUuid))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -62,12 +59,11 @@ public class ArquivoApiController {
     }
 
     @GetMapping
-    public ResponseEntity<?> readAllArquivo(
-            @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sort,
-            @RequestParam(defaultValue = "asc") String direction) {
+    public ResponseEntity<?> readAllArquivo(@RequestParam(required = false) String search,
+                                            @RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "10") int size,
+                                            @RequestParam(defaultValue = "id") String sort,
+                                            @RequestParam(defaultValue = "asc") String direction) {
 
         return this.readAllArquivoUseCase.execute(new ReadAllArquivoCommand(
                         new ArquivoSearchQuery(search, page, size, sort, direction)))
@@ -76,9 +72,8 @@ public class ArquivoApiController {
     }
 
     @PutMapping(value = "/id/{id}")
-    public ResponseEntity<?> updateArticleById(
-            @PathVariable("id") Long aId,
-            @RequestBody UpdateArquivoCommand aInput) {
+    public ResponseEntity<?> updateArticleById(@PathVariable("id") Long aId,
+                                               @RequestBody UpdateArquivoCommand aInput) {
 
         return this.updateArquivoUseCase.execute(UpdateArquivoCommand.from(aId, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -86,9 +81,8 @@ public class ArquivoApiController {
     }
 
     @PutMapping(value = "/uuid/{uuid}")
-    public ResponseEntity<?> updateArticleByUuid(
-            @PathVariable("uuid") String aUuid,
-            @RequestBody UpdateArquivoCommand aInput) {
+    public ResponseEntity<?> updateArticleByUuid(@PathVariable("uuid") String aUuid,
+                                                 @RequestBody UpdateArquivoCommand aInput) {
 
         return this.updateArquivoUseCase.execute(UpdateArquivoCommand.from(aUuid, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -96,9 +90,8 @@ public class ArquivoApiController {
     }
 
     @PatchMapping(value = "/id/{id}")
-    public ResponseEntity<?> patchArquivoById(
-            @PathVariable("id") Long aId,
-            @RequestBody PatchArquivoCommand aInput) {
+    public ResponseEntity<?> patchArquivoById(@PathVariable("id") Long aId,
+                                              @RequestBody PatchArquivoCommand aInput) {
 
         return this.patchArquivoUseCase.execute(PatchArquivoCommand.from(aId, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -106,9 +99,8 @@ public class ArquivoApiController {
     }
 
     @PatchMapping(value = "/uuid/{uuid}")
-    public ResponseEntity<?> patchArquivoByUuid(
-            @PathVariable("uuid") String aUuid,
-            @RequestBody PatchArquivoCommand aInput) {
+    public ResponseEntity<?> patchArquivoByUuid(@PathVariable("uuid") String aUuid,
+                                                @RequestBody PatchArquivoCommand aInput) {
 
         return this.patchArquivoUseCase.execute(PatchArquivoCommand.from(aUuid, aInput))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -116,8 +108,7 @@ public class ArquivoApiController {
     }
 
     @DeleteMapping(value = "/id/{id}")
-    public ResponseEntity<?> deleteArquivoById(
-            @PathVariable("id") Long aId) {
+    public ResponseEntity<?> deleteArquivoById(@PathVariable("id") Long aId) {
 
         return this.deleteArquivoUseCase.execute(DeleteArquivoCommand.from(aId))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -125,8 +116,7 @@ public class ArquivoApiController {
     }
 
     @DeleteMapping(value = "/uuid/{uuid}")
-    public ResponseEntity<?> deleteArquivoByUuid(
-            @PathVariable("uuid") String aUuid) {
+    public ResponseEntity<?> deleteArquivoByUuid(@PathVariable("uuid") String aUuid) {
 
         return this.deleteArquivoUseCase.execute(DeleteArquivoCommand.from(aUuid))
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
@@ -134,9 +124,8 @@ public class ArquivoApiController {
     }
 
     @GetMapping(value = "/{id}/stream")
-    public ResponseEntity<StreamingResponseBody> streamArquivo(
-            @PathVariable("id") Long aId,
-            @RequestHeader(value = "Range", required = false) String aRange) {
+    public ResponseEntity<StreamingResponseBody> streamArquivo(@PathVariable("id") Long aId,
+                                                               @RequestHeader(value = "Range", required = false) String aRange) {
 
         return this.readArquivoUseCase.execute(ReadArquivoCommand.from(aId))
                 .fold(error -> ResponseEntity.notFound().<StreamingResponseBody>build(),
