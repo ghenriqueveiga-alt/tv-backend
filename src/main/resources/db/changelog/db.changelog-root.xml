@@ -12,5 +12,6 @@
     <include file="changes/006-create-episodio.xml"/>
     <include file="changes/007-create-bloco.xml"/>
     <include file="changes/008-create-canal.xml"/>
+    <include file="changes/009-create-propaganda.xml"/>
 
 </databaseChangeLog>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="009-create-propaganda" author="hvs">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="propaganda"/></not>
+        </preConditions>
+        <createTable tableName="propaganda">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="uuid" type="VARCHAR(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="status_desc" type="VARCHAR(255)"/>
+            <column name="bloco_id" type="BIGINT">
+                <constraints foreignKeyName="fk_propaganda_bloco" references="bloco(id)"/>
+            </column>
+            <column name="posicao_desc" type="VARCHAR(255)"/>
+            <column name="nome" type="VARCHAR(255)"/>
+            <column name="duracao_seg" type="INT"/>
+            <column name="arquivo_id" type="BIGINT">
+                <constraints foreignKeyName="fk_propaganda_arquivo" references="arquivo(id)"/>
+            </column>
+            <column name="ordem" type="INT"/>
+        </createTable>
+        <createIndex tableName="propaganda" indexName="idx_propaganda_bloco">
+            <column name="bloco_id"/>
+        </createIndex>
+        <createIndex tableName="propaganda" indexName="idx_propaganda_arquivo">
+            <column name="arquivo_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
