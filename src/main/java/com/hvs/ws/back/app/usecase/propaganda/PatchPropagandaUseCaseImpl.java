@@ -43,6 +43,9 @@ public class PatchPropagandaUseCaseImpl extends PatchPropagandaUseCase {
                                                 aIn.aNome(),
                                                 aIn.aDuracaoSeg(),
                                                 aIn.aOrdem(),
+                                                aIn.aArquivoId(),
+                                                aIn.aRemoverArquivo(),
+                                                aIn.aPagina(),
                                                 propagandaDb.get());
         propaganda.validate(notification);
 

@@ -17,6 +17,8 @@ public class Propaganda extends Entity<PropagandaId> {
     private final Integer duracaoSeg;
     private final Arquivo arquivo;
     private final Integer ordem;
+    /** Página da grade (aba de episódios) a que a propaganda pertence. */
+    private final Integer pagina;
 
     private Propaganda(final PropagandaId id,
                        final PropagandaUuid uuid,
@@ -26,7 +28,8 @@ public class Propaganda extends Entity<PropagandaId> {
                        final String nome,
                        final Integer duracaoSeg,
                        final Arquivo arquivo,
-                       final Integer ordem) {
+                       final Integer ordem,
+                       final Integer pagina) {
 
         super(id);
         this.uuid = uuid;
@@ -37,6 +40,7 @@ public class Propaganda extends Entity<PropagandaId> {
         this.duracaoSeg = duracaoSeg;
         this.arquivo = arquivo;
         this.ordem = ordem;
+        this.pagina = pagina;
     }
 
     public static Propaganda create(final Long aBlocoId,
@@ -44,7 +48,8 @@ public class Propaganda extends Entity<PropagandaId> {
                                     final String aNome,
                                     final Integer aDuracaoSeg,
                                     final Long aArquivoId,
-                                    final Integer aOrdem) {
+                                    final Integer aOrdem,
+                                    final Integer aPagina) {
 
         return new Propaganda(
                 PropagandaId.from(-1L),
@@ -55,14 +60,28 @@ public class Propaganda extends Entity<PropagandaId> {
                 aNome,
                 aDuracaoSeg,
                 aArquivoId != null ? Arquivo.from(aArquivoId) : null,
-                aOrdem);
+                aOrdem,
+                aPagina);
     }
 
     public static Propaganda patch(final Long aId,
                                    final String aNome,
                                    final Integer aDuracaoSeg,
                                    final Integer aOrdem,
+                                   final Long aArquivoId,
+                                   final Boolean aRemoverArquivo,
+                                   final Integer aPagina,
                                    final Propaganda aPropagandaDB) {
+
+        // Arquivo: id troca o vídeo, `remover` desassocia, ausência mantém o atual.
+        final Arquivo arquivo;
+        if (Boolean.TRUE.equals(aRemoverArquivo)) {
+            arquivo = null;
+        } else if (aArquivoId != null) {
+            arquivo = Arquivo.from(aArquivoId);
+        } else {
+            arquivo = aPropagandaDB.getArquivo();
+        }
 
         return new Propaganda(
                 aId != null ? PropagandaId.from(aId) : aPropagandaDB.getId(),
@@ -72,8 +91,9 @@ public class Propaganda extends Entity<PropagandaId> {
                 aPropagandaDB.getPosicao(),
                 aNome != null ? aNome : aPropagandaDB.getNome(),
                 aDuracaoSeg != null ? aDuracaoSeg : aPropagandaDB.getDuracaoSeg(),
-                aPropagandaDB.getArquivo(),
-                aOrdem != null ? aOrdem : aPropagandaDB.getOrdem());
+                arquivo,
+                aOrdem != null ? aOrdem : aPropagandaDB.getOrdem(),
+                aPagina != null ? aPagina : aPropagandaDB.getPagina());
     }
 
     public static Propaganda from(final Long aId,
@@ -84,7 +104,8 @@ public class Propaganda extends Entity<PropagandaId> {
                                   final String aNome,
                                   final Integer aDuracaoSeg,
                                   final Arquivo aArquivo,
-                                  final Integer aOrdem) {
+                                  final Integer aOrdem,
+                                  final Integer aPagina) {
 
         return new Propaganda(
                 aId != null ? PropagandaId.from(aId) : null,
@@ -95,13 +116,15 @@ public class Propaganda extends Entity<PropagandaId> {
                 aNome,
                 aDuracaoSeg,
                 aArquivo,
-                aOrdem);
+                aOrdem,
+                aPagina);
     }
 
     public static Propaganda from(final Long aId) {
 
         return new Propaganda(
                 aId != null ? PropagandaId.from(aId) : null,
+                null,
                 null,
                 null,
                 null,
@@ -142,6 +165,9 @@ public class Propaganda extends Entity<PropagandaId> {
     public Integer getOrdem() {
         return ordem;
     }
+    public Integer getPagina() {
+        return pagina;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -161,7 +187,8 @@ public class Propaganda extends Entity<PropagandaId> {
                 Objects.equals(nome, propaganda.nome) &&
                 Objects.equals(duracaoSeg, propaganda.duracaoSeg) &&
                 Objects.equals(arquivo, propaganda.arquivo) &&
-                Objects.equals(ordem, propaganda.ordem);
+                Objects.equals(ordem, propaganda.ordem) &&
+                Objects.equals(pagina, propaganda.pagina);
     }
 
     @Override
@@ -176,6 +203,7 @@ public class Propaganda extends Entity<PropagandaId> {
                 nome,
                 duracaoSeg,
                 arquivo,
-                ordem);
+                ordem,
+                pagina);
     }
 }

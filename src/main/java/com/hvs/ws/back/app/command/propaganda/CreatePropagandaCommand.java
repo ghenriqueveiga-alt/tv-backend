@@ -5,14 +5,16 @@ public record CreatePropagandaCommand(Long aBlocoId,
                                       String aNome,
                                       Integer aDuracaoSeg,
                                       Long aArquivoId,
-                                      Integer aOrdem) {
+                                      Integer aOrdem,
+                                      Integer aPagina) {
 
     public static CreatePropagandaCommand from(final Long aBlocoId,
                                                final String aPosicaoCode,
                                                final String aNome,
                                                final Integer aDuracaoSeg,
                                                final Long aArquivoId,
-                                               final Integer aOrdem) {
+                                               final Integer aOrdem,
+                                               final Integer aPagina) {
 
         return new CreatePropagandaCommand(
                 aBlocoId,
@@ -20,6 +22,7 @@ public record CreatePropagandaCommand(Long aBlocoId,
                 aNome,
                 aDuracaoSeg,
                 aArquivoId,
-                aOrdem);
+                aOrdem,
+                aPagina);
     }
 }

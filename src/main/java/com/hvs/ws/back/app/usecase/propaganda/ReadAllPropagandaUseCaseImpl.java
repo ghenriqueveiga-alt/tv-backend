@@ -41,6 +41,18 @@ public class ReadAllPropagandaUseCaseImpl extends ReadAllPropagandaUseCase {
                     .toList();
         }
 
+        // Uma propaganda por página da grade: quem pede uma página só enxerga as
+        // daquela página (sem página gravada = legado, vale para todas).
+        if (aIn.aPagina() != null) {
+
+            final Integer pagina = aIn.aPagina();
+
+            lista = lista.stream()
+                    .filter(propaganda -> propaganda.getPagina() == null
+                            || pagina.equals(propaganda.getPagina()))
+                    .toList();
+        }
+
         return Either.right(ReadAllPropagandaOutput.from(lista));
     }
 }

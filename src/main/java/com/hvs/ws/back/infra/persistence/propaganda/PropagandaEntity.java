@@ -27,6 +27,7 @@ public class PropagandaEntity extends BasicEntity {
     @JoinColumn(name = "arquivo_id", referencedColumnName = "id")
     private ArquivoEntity arquivo;
     private Integer ordem;
+    private Integer pagina;
 
     public PropagandaEntity() {
 
@@ -40,7 +41,8 @@ public class PropagandaEntity extends BasicEntity {
                             final String nome,
                             final Integer duracaoSeg,
                             final ArquivoEntity arquivo,
-                            final Integer ordem) {
+                            final Integer ordem,
+                            final Integer pagina) {
 
         this.id = id;
         this.uuid = uuid;
@@ -51,6 +53,7 @@ public class PropagandaEntity extends BasicEntity {
         this.duracaoSeg = duracaoSeg;
         this.arquivo = arquivo;
         this.ordem = ordem;
+        this.pagina = pagina;
     }
 
     public static PropagandaEntity from(final Propaganda aPropaganda) {
@@ -64,7 +67,8 @@ public class PropagandaEntity extends BasicEntity {
                 aPropaganda.getNome(),
                 aPropaganda.getDuracaoSeg(),
                 aPropaganda.getArquivo() != null ? ArquivoEntity.from(aPropaganda.getArquivo().getId().getValue()) : null,
-                aPropaganda.getOrdem());
+                aPropaganda.getOrdem(),
+                aPropaganda.getPagina());
     }
 
     public static PropagandaEntity from(final Long aPropagandaId) {
@@ -86,7 +90,8 @@ public class PropagandaEntity extends BasicEntity {
                 nome,
                 duracaoSeg,
                 arquivo != null ? arquivo.toDomain() : null,
-                ordem);
+                ordem,
+                pagina);
     }
 
     @Override

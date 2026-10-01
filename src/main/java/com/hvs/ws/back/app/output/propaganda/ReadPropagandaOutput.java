@@ -11,7 +11,8 @@ public record ReadPropagandaOutput(Long aId,
                                    Integer aDuracaoSeg,
                                    Long aArquivoId,
                                    String aArquivoNome,
-                                   Integer aOrdem) {
+                                   Integer aOrdem,
+                                   Integer aPagina) {
 
     public static ReadPropagandaOutput from(final Propaganda aPropaganda) {
 
@@ -25,6 +26,7 @@ public record ReadPropagandaOutput(Long aId,
                 aPropaganda.getDuracaoSeg(),
                 aPropaganda.getArquivo() != null ? aPropaganda.getArquivo().getId().getValue() : null,
                 aPropaganda.getArquivo() != null ? aPropaganda.getArquivo().getNome() : null,
-                aPropaganda.getOrdem());
+                aPropaganda.getOrdem(),
+                aPropaganda.getPagina());
     }
 }

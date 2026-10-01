@@ -40,7 +40,8 @@ public class CreatePropagandaUseCaseImpl extends CreatePropagandaUseCase {
                                                  aIn.aNome(),
                                                  aIn.aDuracaoSeg(),
                                                  aIn.aArquivoId(),
-                                                 ordem);
+                                                 ordem,
+                                                 aIn.aPagina());
         propaganda.validate(notification);
 
         return notification.hasError() ? API.Left(notification) : create(propaganda);

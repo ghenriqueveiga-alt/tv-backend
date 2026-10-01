@@ -2,15 +2,27 @@ package com.hvs.ws.back.infra.api;
 
 import com.hvs.ws.back.app.command.arquivo.*;
 import com.hvs.ws.back.app.usecase.arquivo.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/arquivo")
 public class ArquivoApiController {
+
+    /** Extensões aceitas como vídeo de propaganda (a mesma lista do front). */
+    private static final Set<String> VIDEO_EXTS =
+            Set.of(".mp4", ".mkv", ".webm", ".mov", ".avi", ".flv",
+                   ".mpg", ".mpeg", ".m4v", ".wmv", ".rmvb");
 
     private final CreateArquivoUseCase createArquivoUseCase;
     private final ReadArquivoUseCase readArquivoUseCase;
@@ -19,12 +31,16 @@ public class ArquivoApiController {
     private final PatchArquivoUseCase patchArquivoUseCase;
     private final DeleteArquivoUseCase deleteArquivoUseCase;
 
+    /** Raiz das mídias (`webstore.media.root`); uploads caem em `propagandas/`. */
+    private final String mediaRoot;
+
     public ArquivoApiController(final CreateArquivoUseCase createArquivoUseCase,
                                 final ReadArquivoUseCase readArquivoUseCase,
                                 final ReadAllArquivoUseCase readAllArquivoUseCase,
                                 final UpdateArquivoUseCase updateArquivoUseCase,
                                 final PatchArquivoUseCase patchArquivoUseCase,
-                                final DeleteArquivoUseCase deleteArquivoUseCase) {
+                                final DeleteArquivoUseCase deleteArquivoUseCase,
+                                @Value("${webstore.media.root:./media}") final String mediaRoot) {
 
         this.createArquivoUseCase = createArquivoUseCase;
         this.readArquivoUseCase = readArquivoUseCase;
@@ -32,6 +48,7 @@ public class ArquivoApiController {
         this.updateArquivoUseCase = updateArquivoUseCase;
         this.patchArquivoUseCase = patchArquivoUseCase;
         this.deleteArquivoUseCase = deleteArquivoUseCase;
+        this.mediaRoot = mediaRoot;
     }
 
     @PostMapping
@@ -40,6 +57,52 @@ public class ArquivoApiController {
         return this.createArquivoUseCase.execute(aInput)
                 .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
                         success -> new ResponseEntity<>(success, HttpStatus.OK));
+    }
+
+    /**
+     * Envia o vídeo da propaganda: grava o arquivo em `{mediaRoot}/propagandas/`
+     * e cria o registro do catálogo (nome original, extensão, tamanho, caminho).
+     * Devolve o arquivo criado já com o id, para a propaganda associar.
+     */
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadArquivo(@RequestParam("file") final MultipartFile aFile) {
+
+        final String original = aFile.getOriginalFilename() != null ? aFile.getOriginalFilename().trim() : "";
+        final String ext = extrairExtensao(original);
+
+        if (aFile.isEmpty() || original.isEmpty()) {
+            return new ResponseEntity<>("Arquivo vazio.", HttpStatus.BAD_REQUEST);
+        }
+        if (!VIDEO_EXTS.contains(ext)) {
+            return new ResponseEntity<>("Formato de video nao suportado: " + ext, HttpStatus.BAD_REQUEST);
+        }
+
+        final Path pasta = Paths.get(this.mediaRoot, "propagandas");
+        final Path destino = pasta.resolve(UUID.randomUUID() + ext).toAbsolutePath();
+
+        try {
+            Files.createDirectories(pasta);
+            aFile.transferTo(destino.toFile());
+        } catch (IOException e) {
+            return new ResponseEntity<>("Falha ao gravar o arquivo: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        final String nome = original.length() > 200 ? original.substring(0, 200) : original;
+        final String caminho = destino.toString().replace('\\', '/');
+
+        return this.createArquivoUseCase
+                .execute(new CreateArquivoCommand(nome, ext, aFile.getSize(), caminho))
+                .fold(error -> new ResponseEntity<>(error, HttpStatus.CONFLICT),
+                        success -> this.readArquivoUseCase.execute(ReadArquivoCommand.from(success.aId()))
+                                .fold(readError -> new ResponseEntity<>(success, HttpStatus.OK),
+                                        readOk -> new ResponseEntity<>(readOk, HttpStatus.OK)));
+    }
+
+    /** "meu_video.MP4" → ".mp4" (o catálogo guarda a extensão com o ponto). */
+    private static String extrairExtensao(final String aNome) {
+        final int ponto = aNome.lastIndexOf('.');
+        return ponto < 0 ? "" : aNome.substring(ponto).toLowerCase();
     }
 
     @GetMapping(value = "/id/{id}")
@@ -202,9 +265,11 @@ public class ArquivoApiController {
         if (aTipo == null || aTipo.isBlank()) {
             return MediaType.APPLICATION_OCTET_STREAM_VALUE;
         }
+        // o catálogo guarda a extensão com ponto (".mp4"); sem tirar, viraria "video/.mp4"
         final String lower = aTipo.toLowerCase().trim();
-        return switch (lower) {
-            case "mp4" -> "video/mp4";
+        final String ext = lower.startsWith(".") ? lower.substring(1) : lower;
+        return switch (ext) {
+            case "mp4", "m4v" -> "video/mp4";
             case "avi" -> "video/x-msvideo";
             case "mkv" -> "video/x-matroska";
             case "flv" -> "video/x-flv";
@@ -212,7 +277,8 @@ public class ArquivoApiController {
             case "mov" -> "video/quicktime";
             case "wmv" -> "video/x-ms-wmv";
             case "webm" -> "video/webm";
-            default -> lower.contains("/") ? lower : "video/" + lower;
+            case "mpg", "mpeg" -> "video/mpeg";
+            default -> ext.contains("/") ? ext : "video/" + ext;
         };
     }
 }

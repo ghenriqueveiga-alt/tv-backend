@@ -3,6 +3,7 @@ package com.hvs.ws.back.infra.config.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,6 +30,19 @@ class SecurityConfig {
                         "/v3/api-docs/**",
                         "/tv-api-docs/**",
                         "/tv-documentation/**")
+                        .permitAll())
+                .authorizeHttpRequests(registry -> registry
+                .requestMatchers(HttpMethod.GET,
+                        "/api/v1/propaganda",
+                        "/api/v1/propaganda/**",
+                        "/api/v1/arquivo/**",
+                        "/api/v1/grade/**",
+                        "/api/v1/bloco/**",
+                        "/api/v1/episodio/**",
+                        "/api/v1/programa/**",
+                        "/api/v1/canal/**",
+                        "/api/v1/genero/**",
+                        "/api/v1/linha-vermelha/**")
                         .permitAll())
                 .authorizeHttpRequests(registry -> registry
                         .requestMatchers("/api/v1/**")
