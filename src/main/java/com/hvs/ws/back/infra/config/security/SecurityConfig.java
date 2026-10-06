@@ -35,6 +35,7 @@ class SecurityConfig {
                 .requestMatchers(HttpMethod.GET,
                         "/api/v1/propaganda",
                         "/api/v1/propaganda/**",
+                        "/api/v1/anuncio",
                         "/api/v1/arquivo/**",
                         "/api/v1/grade/**",
                         "/api/v1/bloco/**",
