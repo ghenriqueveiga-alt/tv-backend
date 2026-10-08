@@ -135,6 +135,7 @@ private final CreateEpisodioUseCase createEpisodioUseCase;
                     m.put("aParte", row[5] != null ? ((Number) row[5]).longValue() : 0L);
                     m.put("aDuracao", row[6] != null ? row[6].toString() : null);
                     m.put("aCapaUrl", row[7] != null ? row[7].toString() : null);
+                    m.put("aArquivoId", row[8] != null ? ((Number) row[8]).longValue() : null);
                     return m;
                 })
                 .toList();

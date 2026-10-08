@@ -6,10 +6,12 @@ import com.hvs.ws.back.infra.persistence.bloco.BlocoEntity;
 import com.hvs.ws.back.infra.persistence.episodio.EpisodioEntity;
 import com.hvs.ws.back.infra.persistence.genero.GeneroEntity;
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 import java.util.List;
 
 @Entity
 @Table(name = "programa")
+@BatchSize(size = 50)
 public class ProgramaEntity extends BasicEntity {
 
     @Id

@@ -70,11 +70,14 @@ public class BlocoDomainGatewayImpl implements BlocoDomainGateway {
 
         pages = this.repository.findAll(specification, pageable);
 
+        // Mapping leve (programa/grade sem coleções lazy): a resposta final usa
+        // só os campos mínimos de programa e grade, e o toDomain completo
+        // disparava ~100 lazy loads (episódios/blocos/generos) por listagem.
         return new Pagination<>(
                 pages.getNumber(),
                 pages.getTotalElements(),
                 pages.getTotalPages(),
-                pages.getContent().stream().map(BlocoEntity::toDomain).toList());
+                pages.getContent().stream().map(BlocoEntity::toDomainChildren).toList());
     }
 
     @Override

@@ -8,11 +8,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import com.hvs.ws.back.infra.persistence.bloco.BlocoEntity;
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.List;
 
 @Entity
 @Table(name = "grade")
+@BatchSize(size = 50)
 public class GradeEntity extends BasicEntity {
 
     @Id
@@ -124,7 +126,7 @@ public class GradeEntity extends BasicEntity {
                 getId(),
                 uuid,
                 null,
-                null,
+                nome,
                 null,
                 null,
                 null,

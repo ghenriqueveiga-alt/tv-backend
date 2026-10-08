@@ -16,13 +16,12 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Dumping data for table `grade`
+-- Dumping data for table `anuncio`
 --
 
-LOCK TABLES `grade` WRITE;
-/*!40000 ALTER TABLE `grade` DISABLE KEYS */;
-INSERT INTO `grade` (`id`, `descricao`, `grade_ativa`, `nome`, `periodo_fim`, `periodo_inicio`, `status_desc`, `uuid`) VALUES (1,'Grade principal com toda a programação semanal de segunda a domingo',_binary '','Grade Principal','2026-12-31','2026-01-01','Active','e9342c84-0ebd-4448-a1e6-3268f289b27c'),(2,'Programação voltada para o público infantil com desenhos animados e animes leves',_binary '\0','Grade Kids','2026-12-31','2026-01-01','Active','5ce64f6b-02af-4752-82e2-5c6d5cc55172'),(3,'Programação noturna com animes mais maduros e séries para adultos',_binary '\0','Grade Noite','2026-12-31','2026-01-01','Active','c679d6b2-3dcb-4352-94b8-bd4b71e8fbc5'),(4,'Programação especial para sábados e domingos com maratons e especiais',_binary '\0','Grade Fim de Semana','2026-12-31','2026-01-01','Active','58470fb5-a349-4d64-bdca-52d041916e23'),(5,'Animes e desenhos clássicos dos anos 80, 90 e 2000',_binary '\0','Grade Clássicos','2026-12-31','2026-01-01','Active','16ae36fe-904f-4d8f-806b-46c12284920e');
-/*!40000 ALTER TABLE `grade` ENABLE KEYS */;
+LOCK TABLES `anuncio` WRITE;
+/*!40000 ALTER TABLE `anuncio` DISABLE KEYS */;
+/*!40000 ALTER TABLE `anuncio` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -34,4 +33,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-10-08 21:39:41
+-- Dump completed on 2026-10-08 21:39:40

@@ -186,6 +186,55 @@ public class ArquivoApiController {
                         success -> new ResponseEntity<>(success, HttpStatus.OK));
     }
 
+    /**
+     * HEAD sem corpo: o navegador (Gecko/Chromium) emite um HEAD antes do
+     * GET em algumas situações; delegar ao GET faria o stream completo só
+     * para descartar o corpo (segundos de atraso). Aqui só os headers.
+     */
+    @RequestMapping(value = "/{id}/stream", method = RequestMethod.HEAD)
+    public ResponseEntity<Void> headArquivo(@PathVariable("id") Long aId,
+                                            @RequestHeader(value = "Range", required = false) String aRange) {
+
+        return this.readArquivoUseCase.execute(ReadArquivoCommand.from(aId))
+                .fold(error -> ResponseEntity.notFound().<Void>build(),
+                        output -> {
+                            final File file = new File(output.aCaminho());
+                            if (!file.exists()) {
+                                return ResponseEntity.notFound().<Void>build();
+                            }
+
+                            final long fileLength = file.length();
+                            final String contentType = resolveContentType(output.aTipo());
+                            // range múltiplo (vírgula) não é atendido: ignoramos
+                            // o Range e servimos o arquivo inteiro (200) — RFC 9110
+                            // permite ignorar um Range não suportado.
+                            final boolean full = aRange == null || aRange.contains(",");
+
+                            if (full) {
+                                return ResponseEntity.ok()
+                                        .contentType(MediaType.parseMediaType(contentType))
+                                        .contentLength(fileLength)
+                                        .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                                        .build();
+                            }
+
+                            final long[] range = parseRange(aRange, fileLength);
+                            if (range == null) {
+                                return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
+                                        .header(HttpHeaders.CONTENT_RANGE, "bytes */" + fileLength)
+                                        .build();
+                            }
+
+                            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                                    .contentType(MediaType.parseMediaType(contentType))
+                                    .header(HttpHeaders.CONTENT_RANGE,
+                                            "bytes " + range[0] + "-" + range[1] + "/" + fileLength)
+                                    .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                                    .contentLength(range[1] - range[0] + 1)
+                                    .build();
+                        });
+    }
+
     @GetMapping(value = "/{id}/stream")
     public ResponseEntity<StreamingResponseBody> streamArquivo(@PathVariable("id") Long aId,
                                                                @RequestHeader(value = "Range", required = false) String aRange) {
@@ -202,11 +251,20 @@ public class ArquivoApiController {
 
                             final String contentType = resolveContentType(output.aTipo());
                             final long fileLength = file.length();
+                            // range múltiplo (vírgula): ignorar e servir completo
+                            final boolean full = aRange == null || aRange.contains(",");
 
-                            if (aRange == null) {
+                            final long[] range = full ? null : parseRange(aRange, fileLength);
+
+                            if (full) {
+                                // Buffers grandes + saída bufferizada: menos idas
+                                // ao sistema de arquivos/flip por escrita, fluxo
+                                // mais estável em rede lenta (.onion/celular).
                                 final StreamingResponseBody stream = outputStream -> {
-                                    try (var in = new BufferedInputStream(new FileInputStream(file))) {
-                                        in.transferTo(outputStream);
+                                    try (var in = new BufferedInputStream(new FileInputStream(file), 131072)) {
+                                        final var out = new BufferedOutputStream(outputStream, 65536);
+                                        in.transferTo(out);
+                                        out.flush();
                                     }
                                 };
                                 return ResponseEntity.ok()
@@ -216,21 +274,33 @@ public class ArquivoApiController {
                                         .body(stream);
                             }
 
-                            final long[] range = parseRange(aRange, fileLength);
+                            if (range == null) {
+                                // Range malformado/insatisfatório: 416 com o
+                                // tamanho total (RFC 9110 §14.4) em vez de 500 —
+                                // 500 vira "formato de vídeo não suportado" no
+                                // navegador.
+                                final HttpHeaders range416 = new HttpHeaders();
+                                range416.set(HttpHeaders.CONTENT_RANGE, "bytes */" + fileLength);
+                                return new ResponseEntity<>(null, range416,
+                                        HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+                            }
+
                             final long start = range[0];
                             final long end = range[1];
                             final long contentLength = end - start + 1;
 
                             final StreamingResponseBody stream = outputStream -> {
-                                try (var in = new BufferedInputStream(new FileInputStream(file))) {
+                                try (var in = new BufferedInputStream(new FileInputStream(file), 131072)) {
                                     in.skip(start);
-                                    final byte[] buffer = new byte[8192];
+                                    final var out = new BufferedOutputStream(outputStream, 65536);
+                                    final byte[] buffer = new byte[65536];
                                     long remaining = contentLength;
                                     int read;
                                     while (remaining > 0 && (read = in.read(buffer, 0, (int) Math.min(buffer.length, remaining))) != -1) {
-                                        outputStream.write(buffer, 0, read);
+                                        out.write(buffer, 0, read);
                                         remaining -= read;
                                     }
+                                    out.flush();
                                 }
                             };
 
@@ -245,15 +315,52 @@ public class ArquivoApiController {
                         });
     }
 
+    /**
+     * Interpreta um cabeçalho Range de arquivo único.
+     * Suporta "bytes=N-M", "bytes=N-" e o sufixo "bytes=-N" (o Gecko/Chromium
+     * usa o sufixo para sondar o fim do arquivo e localizar o átomo `moov`
+     * quando o MP4 não é faststart). Devolve {@code null} quando o valor é
+     * malformado ou não satisfazível — o chamador responde 416 em vez de 500.
+     */
     private long[] parseRange(final String aRange, final long aFileLength) {
-        final String rangeValue = aRange.replace("bytes=", "");
-        final String[] parts = rangeValue.split("-");
+        if (aFileLength <= 0) {
+            return null;
+        }
 
-        long start = Long.parseLong(parts[0]);
-        long end = parts.length > 1 && !parts[1].isEmpty()
-                ? Long.parseLong(parts[1])
-                : aFileLength - 1;
+        final String rangeValue = aRange.trim().replace("bytes=", "").trim();
+        final String[] parts = rangeValue.split("-", 2);
 
+        if (parts.length != 2) {
+            return null;
+        }
+
+        long start;
+        long end;
+
+        if (parts[0].isEmpty()) {
+            // sufixo: últimos N bytes
+            try {
+                final long suffix = Long.parseLong(parts[1]);
+                if (suffix <= 0) {
+                    return null;
+                }
+                start = Math.max(0, aFileLength - suffix);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+            end = aFileLength - 1;
+        } else {
+            try {
+                start = Long.parseLong(parts[0]);
+                end = parts[1].isEmpty() ? aFileLength - 1 : Long.parseLong(parts[1]);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
+        if (start < 0 || start >= aFileLength || start > end) {
+            return null;
+        }
         if (end >= aFileLength) {
             end = aFileLength - 1;
         }

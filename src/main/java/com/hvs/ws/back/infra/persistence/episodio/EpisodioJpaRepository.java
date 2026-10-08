@@ -24,7 +24,7 @@ public interface EpisodioJpaRepository extends JpaRepository<EpisodioEntity, Lon
     List<EpisodioEntity> findFirstByProgramaIds(@Param("programaIds") List<Long> programaIds);
 
     @Query(value =
-        "SELECT e.id, e.numero, e.titulo, e.programa_id, e.temporada, e.parte, e.duracao, e.capa_url " +
+        "SELECT e.id, e.numero, e.titulo, e.programa_id, e.temporada, e.parte, e.duracao, e.capa_url, e.arquivo_id " +
         "FROM episodio e " +
         "INNER JOIN (" +
         "  SELECT ep.id, ROW_NUMBER() OVER (PARTITION BY ep.programa_id ORDER BY ep.temporada, ep.parte, ep.numero) AS rn" +
